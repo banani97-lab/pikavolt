@@ -7,15 +7,24 @@ export const dynamic = 'force-dynamic';
 const EXPIRY_MINUTES = 30;
 
 /**
- * GET /api/cron/expire-unpaid  (header: x-cron-secret)
+ * GET /api/cron/expire-unpaid
  *
  * Cancels 'requested' appointments older than 30 minutes whose deposit never
  * succeeded — freeing the held slot — and cancels their pending
  * PaymentIntents so stale client secrets can't be paid later.
+ *
+ * Auth accepts either:
+ *  - `Authorization: Bearer ${CRON_SECRET}` — how Vercel Cron invokes it (it
+ *    injects this header automatically when CRON_SECRET is set); or
+ *  - `x-cron-secret: ${SUPABASE_DB_WEBHOOK_SECRET}` — for manual/other triggers.
  */
 export async function GET(request: Request) {
-  const secret = request.headers.get('x-cron-secret');
-  if (!secret || secret !== process.env.SUPABASE_DB_WEBHOOK_SECRET) {
+  const authorized =
+    (!!process.env.CRON_SECRET &&
+      request.headers.get('authorization') === `Bearer ${process.env.CRON_SECRET}`) ||
+    (!!process.env.SUPABASE_DB_WEBHOOK_SECRET &&
+      request.headers.get('x-cron-secret') === process.env.SUPABASE_DB_WEBHOOK_SECRET);
+  if (!authorized) {
     return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
   }
 
