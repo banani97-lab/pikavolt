@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "885940028888",
+    "project_id": "pikavolt-2660b",
+    "storage_bucket": "pikavolt-2660b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:885940028888:android:04e08980e9abeefadfdead",
+        "android_client_info": {
+          "package_name": "com.pikavolt.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8SYhSTBcfyyqfl93w9KGupR0FZln9ZXg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
