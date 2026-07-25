@@ -48,7 +48,7 @@
              restricted to com.pikavolt.app) before enabling map screens. -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="TODO_GOOGLE_MAPS_ANDROID_API_KEY" />
+            android:value="AIzaSyBYY7KGx2sn89Xmr2ipD_Z9V7RLzzVx1TA" />
 
         <!-- TODO(firebase): place google-services.json in android/app/ and
              apply the com.google.gms.google-services Gradle plugin to enable
