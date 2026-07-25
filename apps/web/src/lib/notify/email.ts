@@ -1,6 +1,7 @@
 import 'server-only';
 
-const FROM = 'Pikavolt LLC <no-reply@pikavolt.com>';
+// Domain must be verified in Resend before delivery works (DKIM/SPF DNS records).
+const FROM = process.env.RESEND_FROM ?? 'Pikavolt LLC <no-reply@pikavolt.net>';
 
 export interface EmailMessage {
   to: string;
@@ -18,16 +19,28 @@ export async function sendEmail(msg: EmailMessage) {
     console.info(`[email:noop] → ${msg.to}: ${msg.subject}`);
     return { id: null, noop: true as const };
   }
-  const { Resend } = await import('resend');
-  const resend = new Resend(key);
-  const { data, error } = await resend.emails.send({
-    from: FROM,
-    to: msg.to,
-    subject: msg.subject,
-    html: msg.html,
-  });
-  if (error) throw new Error(`Resend: ${error.message}`);
-  return { id: data?.id ?? null, noop: false as const };
+  // Email is best-effort and MUST NOT throw: notify helpers run inside the
+  // Stripe webhook handler, whose catch block removes the idempotency marker to
+  // force a retry. A throw here (e.g. unverified sending domain) would make
+  // Stripe retry the payment webhook forever. So we log and swallow instead.
+  try {
+    const { Resend } = await import('resend');
+    const resend = new Resend(key);
+    const { data, error } = await resend.emails.send({
+      from: FROM,
+      to: msg.to,
+      subject: msg.subject,
+      html: msg.html,
+    });
+    if (error) {
+      console.error(`[email:failed] → ${msg.to}: ${msg.subject} — ${error.message}`);
+      return { id: null, noop: false as const, error: error.message };
+    }
+    return { id: data?.id ?? null, noop: false as const };
+  } catch (err) {
+    console.error(`[email:failed] → ${msg.to}: ${msg.subject} —`, err);
+    return { id: null, noop: false as const, error: String(err) };
+  }
 }
 
 /** Shared branded shell for transactional emails. */
