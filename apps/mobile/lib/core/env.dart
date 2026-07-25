@@ -1,0 +1,90 @@
+/// Environment configuration for the Pikavolt app.
+///
+/// Values are supplied at build time via `--dart-define`, e.g.:
+/// ```
+/// flutter run \
+///   --dart-define=SUPABASE_URL=https://xyz.supabase.co \
+///   --dart-define=SUPABASE_ANON_KEY=eyJ...
+/// ```
+/// When not provided, local-development defaults are used (a locally running
+/// `supabase start` stack).
+abstract final class Env {
+  /// Default Supabase URL for local development (`supabase start`).
+  static const String _localSupabaseUrl = 'http://127.0.0.1:54321';
+
+  /// Placeholder anon key. This is the well-known demo anon key that the
+  /// Supabase CLI issues for local stacks — it is NOT a secret and must be
+  /// replaced by `--dart-define=SUPABASE_ANON_KEY=...` for any real
+  /// environment.
+  static const String _localSupabaseAnonKey =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.'
+      'eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.'
+      'CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
+
+  static const String supabaseUrl = String.fromEnvironment(
+    'SUPABASE_URL',
+    defaultValue: _localSupabaseUrl,
+  );
+
+  static const String supabaseAnonKey = String.fromEnvironment(
+    'SUPABASE_ANON_KEY',
+    defaultValue: _localSupabaseAnonKey,
+  );
+
+  /// Base URL of the Next.js web API (WS-B) hosting /api/slots and
+  /// /api/payments/*.
+  ///
+  /// Defaults to a locally running `next dev` on this machine. NOTE for the
+  /// Android emulator: `localhost` refers to the emulator itself — pass
+  /// `--dart-define=API_BASE_URL=http://10.0.2.2:3000` to reach the host.
+  /// iOS simulators can use the default.
+  static const String apiBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://localhost:3000',
+  );
+
+  /// Stripe publishable key for PaymentSheet.
+  ///
+  /// Supply with `--dart-define=STRIPE_PUBLISHABLE_KEY=pk_test_...`. When
+  /// empty or left as a placeholder the app shows a friendly
+  /// "payments unavailable in this build" state instead of the PaymentSheet.
+  static const String stripePublishableKey = String.fromEnvironment(
+    'STRIPE_PUBLISHABLE_KEY',
+    defaultValue: '',
+  );
+
+  /// Whether Stripe payments can be presented in this build.
+  static bool get stripeEnabled =>
+      stripePublishableKey.startsWith('pk_') &&
+      !stripePublishableKey.contains('placeholder');
+
+  /// Whether Firebase configuration files are expected to be present.
+  ///
+  /// TODO(firebase): flip the default to `true` once
+  /// `android/app/google-services.json` and
+  /// `ios/Runner/GoogleService-Info.plist` are added to the project.
+  /// Until then Firebase init is skipped and push notifications no-op.
+  static const bool hasFirebaseConfig = bool.fromEnvironment(
+    'HAS_FIREBASE_CONFIG',
+    // ignore: avoid_redundant_argument_values
+    defaultValue: false,
+  );
+
+  /// Owner phone number for click-to-call emergency flow.
+  /// PLACEHOLDER — replace before launch (see docs/owner-content.md).
+  static const String ownerPhoneNumber = '(614) 555-0199';
+
+  /// Whether real Google Maps API keys have been added to
+  /// android/app/src/main/AndroidManifest.xml and ios/Runner/AppDelegate.swift
+  /// (both currently hold TODO placeholders).
+  ///
+  /// When false the customer tracking screen renders the branded radar
+  /// fallback instead of google_maps_flutter. Flip with
+  /// `--dart-define=GOOGLE_MAPS_CONFIGURED=true` once the keys land.
+  /// (Additive edit by WS-G for the tracking screens.)
+  static const bool googleMapsConfigured = bool.fromEnvironment(
+    'GOOGLE_MAPS_CONFIGURED',
+    // ignore: avoid_redundant_argument_values
+    defaultValue: false,
+  );
+}

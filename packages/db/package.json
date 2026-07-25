@@ -1,0 +1,17 @@
+{
+  "name": "@pikavolt/db",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Database layer for Pikavolt LLC — Supabase migrations, seed data, and generated types",
+  "main": "src/types.ts",
+  "types": "src/types.ts",
+  "exports": {
+    ".": "./src/types.ts"
+  },
+  "scripts": {
+    "db:start": "npx supabase@latest start",
+    "db:stop": "npx supabase@latest stop",
+    "db:reset": "npx supabase@latest db reset",
+    "db:types": "npx supabase@latest gen types typescript --local > src/types.ts"
+  }
+}

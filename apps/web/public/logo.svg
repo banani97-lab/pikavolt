@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Pikavolt placeholder bolt mark — replace when owner supplies brand files. -->
+  <path
+    d="M36 4 L14 36 H28 L24 60 L50 24 H34 L40 4 Z"
+    fill="#FFE600"
+    stroke="#FFE600"
+    stroke-width="2"
+    stroke-linejoin="round"
+  />
+</svg>

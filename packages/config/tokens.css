@@ -1,0 +1,46 @@
+/*
+ * Pikavolt LLC brand tokens (CSS custom properties) — palette v2.
+ *
+ * Mascot-derived (see docs/brand.md). Dark theme IS the brand. These raw
+ * values are the single source of truth together with src/tokens.ts — keep
+ * both files (and the @theme block in apps/web/src/app/globals.css) in sync
+ * when a value changes.
+ */
+:root {
+  /* Core palette v2 */
+  --pv-color-storm: #081a21; /* page background — near-black, deep teal cast */
+  --pv-color-surface: #0e2a33; /* cards, panels — dark teal */
+  --pv-color-teal: #2a5e73; /* brand field color (exact mascot backdrop) */
+  --pv-color-teal-deep: #1b4254; /* gradient partner, hovers on teal */
+  --pv-color-volt: #ffe600; /* volt yellow — primary accent */
+  --pv-color-amber: #db9c38; /* mascot fur gold — secondary accent */
+  --pv-color-arc: #22d3ee; /* electric cyan — lightning accents */
+  --pv-color-emergency: #ff3b30; /* danger / 24-7 emergency */
+
+  /* Legacy arc gradient stops (kept for M0 compat; now cyan family) */
+  --pv-color-arc-start: #22d3ee;
+  --pv-color-arc-end: #7df3ff;
+
+  /* Text */
+  --pv-color-text: #f8fafc;
+  --pv-color-text-muted: #9fb8c2; /* muted, tinted toward teal */
+  --pv-color-text-subtle: #6c8894; /* subtle, deeper teal-grey */
+
+  /* Composite */
+  --pv-gradient-arc: linear-gradient(
+    135deg,
+    var(--pv-color-arc-start),
+    var(--pv-color-arc-end)
+  );
+  --pv-gradient-storm: linear-gradient(
+    to bottom,
+    var(--pv-color-teal),
+    var(--pv-color-storm)
+  );
+  --pv-gradient-volt-amber: linear-gradient(
+    135deg,
+    var(--pv-color-volt),
+    var(--pv-color-amber)
+  );
+  --pv-shadow-volt-glow: 0 0 24px rgb(255 230 0 / 0.35);
+}

@@ -1,0 +1,142 @@
+@import "tailwindcss";
+
+/*
+ * Pikavolt brand theme — palette v2 (mascot-derived, see docs/brand.md).
+ * Dark IS the brand. Values mirror packages/config (tokens.css / src/tokens.ts);
+ * keep in sync.
+ */
+@theme {
+  /* Core palette v2 */
+  --color-storm: #081a21; /* page background — near-black, deep teal cast */
+  --color-surface: #0e2a33; /* cards, panels — dark teal */
+  --color-teal: #2a5e73; /* brand field color (exact mascot backdrop) */
+  --color-teal-deep: #1b4254; /* gradient partner, hovers on teal */
+  --color-volt: #ffe600; /* primary accent — CTAs, highlights */
+  --color-amber: #db9c38; /* secondary accent — exact mascot fur gold */
+  --color-arc: #22d3ee; /* electric cyan — lightning accents */
+  --color-emergency: #ff3b30; /* 24/7 emergency elements only */
+
+  /* Text */
+  --color-snow: #f8fafc; /* primary text */
+  --color-muted: #9fb8c2; /* muted text, tinted toward teal */
+
+  /* Legacy arc gradient stops (kept for M0 compat; now cyan family) */
+  --color-arc-start: #22d3ee;
+  --color-arc-end: #7df3ff;
+
+  --font-display: var(--font-anton), sans-serif;
+  --font-sans: var(--font-inter), sans-serif;
+
+  --shadow-volt-glow: 0 0 24px rgb(255 230 0 / 0.35);
+  --shadow-volt-glow-lg: 0 0 48px rgb(255 230 0 / 0.45);
+  --shadow-arc-glow: 0 0 24px rgb(34 211 238 / 0.35);
+  --shadow-emergency-glow: 0 0 24px rgb(255 59 48 / 0.4);
+
+  --animate-marquee: marquee 36s linear infinite;
+  --animate-pulse-ring: pulse-ring 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-float: float 5s ease-in-out infinite;
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes pulse-ring {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.45;
+    }
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+}
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-storm);
+  color: var(--color-snow);
+  font-family: var(--font-sans);
+}
+
+/* Arc gradient utility (electric cyan arc). */
+@utility bg-arc-gradient {
+  background-image: linear-gradient(
+    135deg,
+    var(--color-arc-start),
+    var(--color-arc-end)
+  );
+}
+
+@utility text-arc-gradient {
+  background-image: linear-gradient(
+    135deg,
+    var(--color-arc-start),
+    var(--color-arc-end)
+  );
+  background-clip: text;
+  color: transparent;
+}
+
+/* Teal → storm section wash (hero + section backdrops). */
+@utility bg-storm-gradient {
+  background-image:
+    radial-gradient(
+      90% 70% at 50% 0%,
+      var(--color-teal) 0%,
+      var(--color-teal-deep) 45%,
+      transparent 100%
+    ),
+    linear-gradient(to bottom, var(--color-teal-deep), var(--color-storm) 70%);
+}
+
+/* Volt → amber glowing border (wrap element; give child a bg + same radius). */
+@utility border-volt-gradient {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
+    linear-gradient(135deg, var(--color-volt), var(--color-amber)) border-box;
+}
+
+/* Volt text glow for "powered on" headlines. */
+@utility text-volt-glow {
+  text-shadow:
+    0 0 18px rgb(255 230 0 / 0.5),
+    0 0 60px rgb(255 230 0 / 0.25);
+}
+
+/* Marquee edge fade. */
+@utility mask-fade-x {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 8%,
+    black 92%,
+    transparent
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee,
+  .animate-pulse-ring,
+  .animate-float {
+    animation: none;
+  }
+}

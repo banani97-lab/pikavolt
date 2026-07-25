@@ -1,0 +1,36 @@
+{
+  "name": "@pikavolt/config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./tokens.css": "./tokens.css",
+    "./eslint": "./eslint.config.base.mjs",
+    "./tsconfig.base.json": "./tsconfig.base.json"
+  },
+  "files": [
+    "dist",
+    "tokens.css",
+    "eslint.config.base.mjs",
+    "tsconfig.base.json"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@eslint/js": "^9.30.0",
+    "typescript-eslint": "^8.35.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.30.0",
+    "typescript": "^5.8.3"
+  },
+  "peerDependencies": {
+    "eslint": ">=9"
+  }
+}
