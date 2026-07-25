@@ -66,9 +66,13 @@ export async function POST(request: Request) {
   if (!appt) {
     return NextResponse.json({ error: 'Appointment not found' }, { status: 404 });
   }
-  if (appt.status !== 'in_progress') {
+  // Accept both entry paths: this endpoint can be called directly while the
+  // appointment is still in_progress (it does the transition), OR after the
+  // completeJob action (web admin / mobile owner) has already moved it to
+  // completed. Anything else is a real conflict.
+  if (appt.status !== 'in_progress' && appt.status !== 'completed') {
     return NextResponse.json(
-      { error: `Appointment must be in_progress (is '${appt.status}')` },
+      { error: `Appointment must be in_progress or completed (is '${appt.status}')` },
       { status: 409 },
     );
   }
@@ -77,6 +81,25 @@ export async function POST(request: Request) {
       { error: 'job_total_cents must be set and at least the service call fee' },
       { status: 400 },
     );
+  }
+
+  // Idempotency: if a final charge is already in flight or settled, don't start
+  // another (e.g. a retry after completeJob transitioned the status and the
+  // first call 409'd, or a double-click). A 'failed' row is ignored so declines
+  // can be retried.
+  const { data: existingFinal } = await admin
+    .from('payments')
+    .select('status')
+    .eq('appointment_id', appointmentId)
+    .eq('kind', 'final')
+    .neq('status', 'failed')
+    .maybeSingle();
+  if (existingFinal) {
+    const already: FinalPaymentResponse =
+      existingFinal.status === 'succeeded'
+        ? { status: 'charged' }
+        : { status: 'payment_link_sent' };
+    return NextResponse.json(already);
   }
 
   // Deposit actually collected for this appointment.
@@ -95,14 +118,18 @@ export async function POST(request: Request) {
     depositPaidCents,
   );
 
-  // Work is done → completed (before any charge attempt).
-  const { error: completeError } = await admin
-    .from('appointments')
-    .update({ status: 'completed' })
-    .eq('id', appointmentId);
-  if (completeError) {
-    console.error('[api/payments/final] in_progress→completed failed', completeError);
-    return NextResponse.json({ error: 'Could not complete appointment' }, { status: 500 });
+  // Work is done → completed (before any charge attempt). Skip when completeJob
+  // already transitioned it — 'completed' → 'completed' would be rejected by the
+  // state-machine trigger.
+  if (appt.status === 'in_progress') {
+    const { error: completeError } = await admin
+      .from('appointments')
+      .update({ status: 'completed' })
+      .eq('id', appointmentId);
+    if (completeError) {
+      console.error('[api/payments/final] in_progress→completed failed', completeError);
+      return NextResponse.json({ error: 'Could not complete appointment' }, { status: 500 });
+    }
   }
 
   // Nothing owed (fully covered by discount + deposit) → close immediately.
