@@ -4,10 +4,10 @@ import { getStripe } from '@/lib/stripe';
 import { createAdminClient } from '@/lib/supabase/admin';
 import {
   notifyBookingReceived,
-  notifyFinalPayment,
   notifyOwnerNewBooking,
   notifyPaymentReceipt,
 } from '@/lib/appointments';
+import { notifyBalanceDue, notifyInvoiceReceipt } from '@/lib/invoices';
 
 export const dynamic = 'force-dynamic';
 
@@ -97,16 +97,24 @@ async function handlePaymentSucceeded(admin: AdminClient, pi: Stripe.PaymentInte
     })
     .eq('stripe_payment_intent_id', pi.id);
 
+  // Invoices reuse the deposit/final kinds but need their own copy (no service
+  // call / slot / refund language) — distinguish via the appointment.
+  const { data: appt } = await admin
+    .from('appointments')
+    .select('status, is_invoice')
+    .eq('id', appointmentId)
+    .maybeSingle();
+  const isInvoice = appt?.is_invoice === true;
+
   if (kind === 'deposit') {
-    await notifyBookingReceived(appointmentId);
-    await notifyOwnerNewBooking(appointmentId);
+    if (isInvoice) {
+      await notifyInvoiceReceipt(appointmentId, pi.amount, 'upfront');
+    } else {
+      await notifyBookingReceived(appointmentId);
+      await notifyOwnerNewBooking(appointmentId);
+    }
   } else if (kind === 'final') {
     // Final payment settled → completed → closed (DB trigger validates).
-    const { data: appt } = await admin
-      .from('appointments')
-      .select('status')
-      .eq('id', appointmentId)
-      .maybeSingle();
     if (appt?.status === 'completed') {
       const { error } = await admin
         .from('appointments')
@@ -114,7 +122,11 @@ async function handlePaymentSucceeded(admin: AdminClient, pi: Stripe.PaymentInte
         .eq('id', appointmentId);
       if (error) console.error('[webhooks/stripe] completed→closed failed', error);
     }
-    await notifyPaymentReceipt(appointmentId, 'final', pi.amount);
+    if (isInvoice) {
+      await notifyInvoiceReceipt(appointmentId, pi.amount, 'final');
+    } else {
+      await notifyPaymentReceipt(appointmentId, 'final', pi.amount);
+    }
   }
 }
 
@@ -131,6 +143,6 @@ async function handlePaymentFailed(admin: AdminClient, pi: Stripe.PaymentIntent)
   // Off-session auto-charge declined → pay-link fallback. (Interactive
   // failures are surfaced in the UI; no email spam for those.)
   if (kind === 'final' && pi.metadata?.off_session === 'true') {
-    await notifyFinalPayment(appointmentId, pi.amount);
+    await notifyBalanceDue(appointmentId, pi.amount);
   }
 }

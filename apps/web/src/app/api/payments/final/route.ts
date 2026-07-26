@@ -10,7 +10,7 @@ import {
   isStripeConfigured,
   PAYMENTS_NOT_CONFIGURED,
 } from '@/lib/stripe';
-import { notifyFinalPayment } from '@/lib/appointments';
+import { notifyBalanceDue } from '@/lib/invoices';
 
 export const dynamic = 'force-dynamic';
 
@@ -181,7 +181,7 @@ export async function POST(request: Request) {
       metadata: { appointment_id: appointmentId, kind: 'final' },
     });
     await insertPaymentRow(pi);
-    if (notify) await notifyFinalPayment(appointmentId, finalCents);
+    if (notify) await notifyBalanceDue(appointmentId, finalCents);
     return {
       status: 'payment_link_sent',
       paymentIntentClientSecret: pi.client_secret ?? undefined,
@@ -212,7 +212,7 @@ export async function POST(request: Request) {
             return NextResponse.json(body);
           }
           if (confirmed.status === 'requires_action') {
-            await notifyFinalPayment(appointmentId, finalCents);
+            await notifyBalanceDue(appointmentId, finalCents);
             const body: FinalPaymentResponse = {
               status: 'requires_action',
               paymentIntentClientSecret: confirmed.client_secret ?? undefined,
@@ -220,7 +220,7 @@ export async function POST(request: Request) {
             return NextResponse.json(body);
           }
           // Any other non-terminal status → treat as needing the customer.
-          await notifyFinalPayment(appointmentId, finalCents);
+          await notifyBalanceDue(appointmentId, finalCents);
           const body: FinalPaymentResponse = {
             status: 'payment_link_sent',
             paymentIntentClientSecret: confirmed.client_secret ?? undefined,

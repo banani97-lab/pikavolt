@@ -9,6 +9,7 @@ export type PushType =
   | 'tech_arrived'
   | 'final_payment_due'
   | 'payment_receipt'
+  | 'invoice_due'
   | 'new_message';
 
 export interface PushPayload {
