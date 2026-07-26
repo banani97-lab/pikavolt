@@ -66,6 +66,21 @@ dev_dependencies:
   freezed: ^3.2.6-dev.1
   json_serializable: ^6.14.0
   flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.4
+
+# Branded launch/splash screen — the Pikavolt mascot centered on the app's
+# storm background. Regenerate with: dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#0F2A3A"
+  image: assets/images/mascot.png
+  color_dark: "#0F2A3A"
+  image_dark: assets/images/mascot.png
+  android: true
+  ios: true
+  fullscreen: true
+  android_12:
+    color: "#0F2A3A"
+    image: assets/images/mascot.png
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
