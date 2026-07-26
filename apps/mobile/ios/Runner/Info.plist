@@ -32,6 +32,8 @@
 		<string>Pikavolt shares your technician’s live location with the customer only while en route to an appointment.</string>
 		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 		<string>Pikavolt shares your technician’s live location with the customer only while en route to an appointment.</string>
+		<key>NSCameraUsageDescription</key>
+		<string>Pikavolt uses the camera only if you choose to scan your payment card while entering card details at checkout.</string>
 		<key>UIBackgroundModes</key>
 		<array>
 			<string>location</string>
