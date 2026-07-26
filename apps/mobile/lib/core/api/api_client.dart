@@ -127,6 +127,19 @@ class ApiClient {
     _decode(res);
   }
 
+  /// GET /api/config → Stripe publishable key resolved server-side.
+  ///
+  /// Lets a Stripe test↔live switch happen by changing server env + redeploy,
+  /// with no new app build. Returns null when the server has no valid key
+  /// configured; callers fall back to the compile-time key. Public endpoint —
+  /// the publishable key is not a secret.
+  Future<String?> getStripePublishableKey() async {
+    final res = await _http.get(_uri('/api/config'), headers: _headers());
+    final body = _decode(res);
+    final key = body['stripePublishableKey'];
+    return key is String && key.startsWith('pk_') ? key : null;
+  }
+
   /// POST /api/account/delete
   ///
   /// Permanently deletes the signed-in user's account and personal data. The
