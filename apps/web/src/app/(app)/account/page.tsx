@@ -6,6 +6,7 @@ import { Container } from '@/components/ui/Container';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { createClient } from '@/lib/supabase/server';
 import { AccountForm } from './AccountForm';
+import { DeleteAccountSection } from './DeleteAccountSection';
 
 export const metadata: Metadata = { title: 'Your Account' };
 
@@ -71,6 +72,10 @@ export default async function AccountPage() {
             <ChevronRight className="h-5 w-5 text-zinc-600 transition-colors group-hover:text-volt" />
           </Link>
         </div>
+      </div>
+
+      <div className="max-w-2xl">
+        <DeleteAccountSection />
       </div>
     </Container>
   );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../core/api/api_client.dart';
 import '../../core/models/db_models.dart';
 import '../../core/supabase_provider.dart';
 import '../../core/theme.dart';
@@ -78,6 +79,9 @@ class AccountScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 24),
           _SignOutButton(email: user?.email),
+          const SizedBox(height: 24),
+          _SectionLabel('DANGER ZONE'),
+          const _DeleteAccountButton(),
           const SizedBox(height: 24),
         ],
       ),
@@ -329,6 +333,87 @@ class _SignOutButtonState extends ConsumerState<_SignOutButton> {
       icon: const Icon(Icons.logout),
       label: Text(_busy ? 'SIGNING OUT…' : 'Sign out'),
       onPressed: _busy ? null : _signOut,
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Delete account (App Store 5.1.1(v) / Play account-deletion policy)
+// ---------------------------------------------------------------------------
+
+class _DeleteAccountButton extends ConsumerStatefulWidget {
+  const _DeleteAccountButton();
+
+  @override
+  ConsumerState<_DeleteAccountButton> createState() =>
+      _DeleteAccountButtonState();
+}
+
+class _DeleteAccountButtonState extends ConsumerState<_DeleteAccountButton> {
+  bool _busy = false;
+
+  Future<void> _confirmAndDelete() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Delete account?'),
+        content: const Text(
+          'This permanently deletes your Pikavolt account, profile, saved '
+          'addresses, appointment history, and chat messages. This cannot be '
+          'undone.',
+          style: TextStyle(color: AppColors.mutedText),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _busy = true);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref.read(apiClientProvider).deleteAccount();
+      // Account is gone server-side. Sign out locally so the router redirects
+      // to the login screen. (The device token row was already removed by the
+      // server cascade, so we don't call unregisterToken here.)
+      await ref.read(supabaseClientProvider).auth.signOut();
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Could not delete account: $e')),
+      );
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppColors.error,
+        side: BorderSide(color: AppColors.error.withValues(alpha: 0.6)),
+      ),
+      icon: _busy
+          ? const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppColors.error,
+              ),
+            )
+          : const Icon(Icons.delete_forever_outlined),
+      label: Text(_busy ? 'DELETING…' : 'Delete account'),
+      onPressed: _busy ? null : _confirmAndDelete,
     );
   }
 }

@@ -127,6 +127,20 @@ class ApiClient {
     _decode(res);
   }
 
+  /// POST /api/account/delete
+  ///
+  /// Permanently deletes the signed-in user's account and personal data. The
+  /// server derives the user from the bearer token — no body is sent. Callers
+  /// should sign out locally on success. Required for App Store account-
+  /// deletion policy (Guideline 5.1.1(v)).
+  Future<void> deleteAccount() async {
+    final res = await _http.post(
+      _uri('/api/account/delete'),
+      headers: _headers(),
+    );
+    _decode(res);
+  }
+
   /// GET /api/tracking/eta?appointmentId=...
   ///
   /// Returns the raw JSON body (expected key: `etaSeconds`). Callers must
