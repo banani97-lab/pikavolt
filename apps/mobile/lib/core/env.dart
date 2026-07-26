@@ -68,8 +68,7 @@ abstract final class Env {
   );
 
   /// Owner phone number for click-to-call emergency flow.
-  /// PLACEHOLDER — replace before launch (see docs/owner-content.md).
-  static const String ownerPhoneNumber = '(614) 555-0199';
+  static const String ownerPhoneNumber = '(614) 401-0766';
 
   /// Whether real Google Maps API keys have been added to
   /// android/app/src/main/AndroidManifest.xml and ios/Runner/AppDelegate.swift

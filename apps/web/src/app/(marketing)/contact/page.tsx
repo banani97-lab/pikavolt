@@ -15,7 +15,7 @@ import { Reveal, RevealItem } from '@/components/marketing/Reveal';
 export const metadata: Metadata = {
   title: 'Contact Us',
   description:
-    'Reach Pikavolt LLC, your Central Ohio electrician: call (614) 555-0199 any time — 24/7 for emergencies — chat with us on the site, or book a service call online.',
+    'Reach Pikavolt LLC, your Central Ohio electrician: call (614) 401-0766 any time — 24/7 for emergencies — chat with us on the site, or book a service call online.',
 };
 
 export default function ContactPage() {
@@ -41,7 +41,7 @@ export default function ContactPage() {
           {/* Call */}
           <RevealItem className="h-full">
             <a
-              href="tel:+16145550199"
+              href="tel:+16144010766"
               className="group flex h-full flex-col rounded-xl border border-white/10 bg-surface p-7 transition-all duration-300 hover:-translate-y-1 hover:border-volt/50 hover:shadow-volt-glow"
             >
               <span className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-volt/10 text-volt">
@@ -53,7 +53,7 @@ export default function ContactPage() {
               <p className="mt-2 flex-1 text-sm text-muted">
                 Fastest way to reach us. Tap to call from your phone.
               </p>
-              <span className="mt-5 text-lg font-bold text-volt">(614) 555-0199</span>
+              <span className="mt-5 text-lg font-bold text-volt">(614) 401-0766</span>
             </a>
           </RevealItem>
 
@@ -102,7 +102,7 @@ export default function ContactPage() {
         {/* Emergency strip */}
         <Reveal className="mt-8">
           <a
-            href="tel:+16145550199"
+            href="tel:+16144010766"
             className="flex flex-wrap items-center justify-center gap-3 rounded-xl border border-emergency/50 bg-emergency/10 px-6 py-5 text-center transition-colors hover:bg-emergency/20"
           >
             <Siren className="h-6 w-6 text-emergency animate-pulse-ring" aria-hidden="true" />

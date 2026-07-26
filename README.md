@@ -56,5 +56,5 @@ change their semantics without coordinating across web, mobile, and db.
 
 ## Placeholders to replace before launch
 
-- Owner phone number `(614) 555-0199`
+- Owner phone number `(614) 401-0766`
 - Logo (`apps/web/public/logo.svg` + `Logo.tsx` bolt mark)

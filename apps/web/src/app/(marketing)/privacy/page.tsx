@@ -237,7 +237,7 @@ export default function PrivacyPolicyPage() {
               <a href="mailto:support@pikavolt.net" className="text-arc hover:text-volt">
                 support@pikavolt.net
               </a>{' '}
-              or <a href="tel:+16145550199" className="text-arc hover:text-volt">(614) 555-0199</a>.
+              or <a href="tel:+16144010766" className="text-arc hover:text-volt">(614) 401-0766</a>.
             </p>
             <p>Pikavolt LLC, Central Ohio.</p>
           </Section>

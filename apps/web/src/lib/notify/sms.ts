@@ -8,7 +8,7 @@
  * deliver. Configure via:
  *   TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and one sender:
  *   TWILIO_MESSAGING_SERVICE_SID (preferred — carries the 10DLC campaign) or
- *   TWILIO_FROM_NUMBER (E.164, e.g. +16145550199).
+ *   TWILIO_FROM_NUMBER (E.164, e.g. +16144010766).
  *
  * Uses Twilio's REST API directly via fetch (no SDK dependency).
  */

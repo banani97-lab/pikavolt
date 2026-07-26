@@ -57,6 +57,6 @@ export function emailShell(title: string, bodyHtml: string, ctaText?: string, ct
       <div style="font-size:15px;line-height:1.6;color:#D8E4E9">${bodyHtml}</div>
       ${cta}
     </div>
-    <p style="color:#9FB8C2;font-size:12px;margin-top:16px">Pikavolt LLC — Powering Ohio with Quality You Can Trust.<br/>24/7 Emergency: (614) 555-0199</p>
+    <p style="color:#9FB8C2;font-size:12px;margin-top:16px">Pikavolt LLC — Powering Ohio with Quality You Can Trust.<br/>24/7 Emergency: (614) 401-0766</p>
   </div></body>`;
 }

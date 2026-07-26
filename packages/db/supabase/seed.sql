@@ -23,7 +23,7 @@ insert into public.app_settings (key, value) values
   ('deposit_percent',          '50'),
   ('cancellation_window_hours','24'),
   ('booking_horizon_days',     '30'),
-  ('emergency_phone',          '"+16145550199"');
+  ('emergency_phone',          '"+16144010766"');
 
 -- ---------------------------------------------------------------------------
 -- service_categories (exactly the 7 from owner-content.md)

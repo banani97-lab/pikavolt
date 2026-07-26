@@ -29,7 +29,7 @@ export default function SupportPage() {
         {/* Contact methods */}
         <div className="grid gap-5 sm:grid-cols-3">
           <a
-            href="tel:+16145550199"
+            href="tel:+16144010766"
             className="group flex h-full flex-col rounded-xl border border-white/10 bg-surface p-6 transition-all duration-300 hover:-translate-y-1 hover:border-volt/50 hover:shadow-volt-glow"
           >
             <span className="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-volt/10 text-volt">
@@ -37,7 +37,7 @@ export default function SupportPage() {
             </span>
             <h2 className="mt-4 font-display text-lg uppercase tracking-wide text-snow">Call</h2>
             <p className="mt-1 flex-1 text-sm text-muted">Fastest option. 24/7 for emergencies.</p>
-            <span className="mt-3 font-bold text-volt">(614) 555-0199</span>
+            <span className="mt-3 font-bold text-volt">(614) 401-0766</span>
           </a>
 
           <a

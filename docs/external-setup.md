@@ -65,5 +65,5 @@ Work top to bottom; items marked **(blocking)** gate a launch-critical feature.
 ## 9. Content & legal (owner action)
 
 - [ ] **Logo**: owner has not supplied one — a placeholder bolt mark is in use. Need final SVG (light + dark variants).
-- [ ] **Owner phone number**: seed data uses placeholder `+1 614 555 0199`. Replace `emergency_phone` in `app_settings` (and any marketing copy) with the real 24/7 number before launch.
+- [x] **Owner phone number**: set to `+16144010766` / `(614) 401-0766` across marketing copy, mobile env, and the app_settings seed.
 - [ ] **Sweepstakes official rules**: must be drafted/reviewed by an attorney (state sweepstakes law compliance) before any live drawing. The seeded sample sweepstakes is inactive; keep it inactive until rules are approved.

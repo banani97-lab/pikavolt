@@ -42,11 +42,11 @@ export function Footer() {
             across Central Ohio.
           </p>
           <a
-            href="tel:+16145550199"
+            href="tel:+16144010766"
             className="inline-flex items-center gap-2 rounded-lg border border-emergency/50 bg-emergency/10 px-4 py-2.5 text-sm font-bold text-snow transition-colors hover:bg-emergency/20"
           >
             <PhoneCall className="h-4 w-4 text-emergency animate-pulse-ring" aria-hidden="true" />
-            24/7 Emergency: (614) 555-0199
+            24/7 Emergency: (614) 401-0766
           </a>
         </div>
 

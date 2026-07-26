@@ -129,4 +129,4 @@ Replacement
 - Logo: full-color mascot supplied (see docs/brand.md for description + palette).
   Awaiting the raster file at `apps/web/public/mascot.png`; geometric bolt SVG
   remains the compact glyph for nav/footer.
-- Owner phone number: PLACEHOLDER `(614) 555-0199` — replace before launch.
+- Owner phone number: `(614) 401-0766` (owner's 24/7 line).

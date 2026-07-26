@@ -198,7 +198,7 @@ export function Hero() {
               </Link>
             </span>
             <a
-              href="tel:+16145550199"
+              href="tel:+16144010766"
               className="inline-flex h-13 items-center gap-2 rounded-[13px] border border-emergency/70 bg-emergency/10 px-8 text-base font-bold text-white transition-all hover:bg-emergency hover:shadow-emergency-glow"
             >
               <PhoneCall className="h-5 w-5 text-emergency transition-colors group-hover:text-white" aria-hidden="true" />

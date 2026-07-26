@@ -77,11 +77,11 @@ export default async function ServiceCategoryPage({ params }: PageProps) {
               </Link>
             </span>
             <a
-              href="tel:+16145550199"
+              href="tel:+16144010766"
               className="inline-flex h-12 items-center gap-2 rounded-[11px] border border-white/15 px-7 font-semibold text-snow transition-colors hover:border-volt/50 hover:text-volt"
             >
               <PhoneCall className="h-5 w-5" aria-hidden="true" />
-              (614) 555-0199
+              (614) 401-0766
             </a>
           </div>
         </Container>

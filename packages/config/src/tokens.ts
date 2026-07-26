@@ -61,7 +61,7 @@ export const brand = {
     'Your Trusted Electrical Contractor.',
   ],
   /** PLACEHOLDER — replace before launch (see docs/owner-content.md). */
-  phone: '(614) 555-0199',
-  phoneHref: 'tel:+16145550199',
+  phone: '(614) 401-0766',
+  phoneHref: 'tel:+16144010766',
   region: 'Central Ohio',
 } as const;
