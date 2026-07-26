@@ -208,8 +208,11 @@ class SignupScreen extends HookConsumerWidget {
                             )
                           : const Text('CREATE ACCOUNT'),
                     ),
-                    const SizedBox(height: 12),
-                    const GoogleSignInButton(),
+                    // Google sign-in intentionally omitted for v1: offering a
+                    // third-party social login would trigger App Store
+                    // Guideline 4.8 (must also add Sign in with Apple). Ship
+                    // email/password only; re-enable GoogleSignInButton here
+                    // alongside Apple in a later update.
                     const SizedBox(height: 24),
                     Wrap(
                       alignment: WrapAlignment.center,

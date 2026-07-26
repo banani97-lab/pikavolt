@@ -59,10 +59,13 @@ class AuthErrorBanner extends StatelessWidget {
   }
 }
 
-/// "Continue with Google" button — STUB.
+/// "Continue with Google" button — PARKED (not rendered in v1).
 ///
-/// TODO(auth-agent): wire native Google sign-in (google_sign_in package +
-/// supabase.auth.signInWithIdToken) once OAuth client IDs exist.
+/// Removed from the login/signup screens for the initial App Store release:
+/// shipping a third-party social login would require Sign in with Apple too
+/// (Guideline 4.8). Kept here so it can be re-enabled alongside a native Apple
+/// sign-in in a later update. When wiring for real, replace the stub onPressed
+/// with google_sign_in + supabase.auth.signInWithIdToken.
 class GoogleSignInButton extends StatelessWidget {
   const GoogleSignInButton({super.key});
 

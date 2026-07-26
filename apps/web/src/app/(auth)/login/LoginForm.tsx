@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
-import { GoogleButton } from '@/components/auth/GoogleButton';
 
 function safeRedirect(value: string | null): string {
   return value && value.startsWith('/') && !value.startsWith('//') ? value : '/account';
@@ -42,22 +41,6 @@ export function LoginForm() {
     }
     router.push(redirect);
     router.refresh();
-  }
-
-  async function handleGoogle() {
-    setError(null);
-    setLoading(true);
-    const supabase = createClient();
-    const { error: oauthError } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`,
-      },
-    });
-    if (oauthError) {
-      setError(oauthError.message);
-      setLoading(false);
-    }
   }
 
   return (
@@ -105,14 +88,6 @@ export function LoginForm() {
           {loading ? 'Signing in…' : 'Sign In'}
         </Button>
       </form>
-
-      <div className="my-5 flex items-center gap-3 text-xs uppercase tracking-wider text-zinc-500">
-        <span className="h-px flex-1 bg-white/10" />
-        or
-        <span className="h-px flex-1 bg-white/10" />
-      </div>
-
-      <GoogleButton onClick={handleGoogle} disabled={loading} />
 
       <p className="mt-6 text-center text-sm text-zinc-400">
         New to Pikavolt?{' '}
