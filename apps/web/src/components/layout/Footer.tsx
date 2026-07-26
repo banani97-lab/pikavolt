@@ -23,6 +23,8 @@ const companyLinks = [
   { href: '/book', label: 'Book Now' },
   { href: '/sweepstakes', label: 'Sweepstakes' },
   { href: '/login', label: 'Customer Login' },
+  { href: '/support', label: 'Support' },
+  { href: '/privacy', label: 'Privacy Policy' },
 ];
 
 export function Footer() {
