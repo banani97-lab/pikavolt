@@ -19,9 +19,10 @@ const STEPS = ['Services', 'Details', 'Address', 'Time', 'Review', 'Pay'] as con
 
 interface DepositInfo {
   appointmentId: string;
-  clientSecret: string;
+  clientSecret: string | null;
   depositCents: number;
   discountCents: number;
+  waived: boolean;
 }
 
 interface BookingWizardProps {
@@ -119,6 +120,7 @@ export function BookingWizard({
         paymentIntentClientSecret?: string;
         depositCents?: number;
         discountCents?: number;
+        depositWaived?: boolean;
         error?: string;
       };
       if (res.status === 409) {
@@ -128,16 +130,24 @@ export function BookingWizard({
         go(3);
         return;
       }
-      if (!res.ok || !body.paymentIntentClientSecret || !body.appointmentId) {
+      // A fully-waived deposit (100%-off promo) has no client secret — the
+      // booking is already confirmed server-side, so skip the payment step.
+      const waived = body.depositWaived === true;
+      if (!res.ok || !body.appointmentId || (!waived && !body.paymentIntentClientSecret)) {
         setCreateError(body.error ?? 'Could not start the payment — try again.');
         return;
       }
       setDeposit({
         appointmentId: body.appointmentId,
-        clientSecret: body.paymentIntentClientSecret,
+        clientSecret: body.paymentIntentClientSecret ?? null,
         depositCents: body.depositCents ?? 0,
         discountCents: body.discountCents ?? 0,
+        waived,
       });
+      if (waived) {
+        setDone(true);
+        return;
+      }
       go(5);
     } catch {
       setCreateError('Could not start the payment — check your connection and try again.');
@@ -158,8 +168,18 @@ export function BookingWizard({
           You&apos;re booked!
         </h2>
         <p className="mt-3 text-zinc-300">
-          Your {formatCents(deposit.depositCents)} deposit is in and your service call is requested
-          for <strong className="text-white">{formatApptStart(slot.startsAt)}</strong>.
+          {deposit.waived ? (
+            <>
+              Your promo covered the deposit in full — no payment due. Your service call is requested
+              for <strong className="text-white">{formatApptStart(slot.startsAt)}</strong>.
+            </>
+          ) : (
+            <>
+              Your {formatCents(deposit.depositCents)} deposit is in and your service call is
+              requested for{' '}
+              <strong className="text-white">{formatApptStart(slot.startsAt)}</strong>.
+            </>
+          )}
         </p>
         <p className="mt-2 text-sm text-zinc-500">
           We&apos;ll confirm shortly — watch your email for updates.
@@ -283,7 +303,7 @@ export function BookingWizard({
               onAutoChargeChange={setAutoChargeConsent}
             />
           )}
-          {step === 5 && deposit && (
+          {step === 5 && deposit && deposit.clientSecret && (
             <StepPayment
               clientSecret={deposit.clientSecret}
               depositCents={deposit.depositCents}

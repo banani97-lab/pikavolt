@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Menu, X, PhoneCall, CalendarCheck } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
+import { AccountMenu, type HeaderUser } from '@/components/layout/AccountMenu';
+import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 
 const navLinks = [
@@ -15,9 +17,31 @@ const navLinks = [
   { href: '/contact', label: 'Contact' },
 ];
 
-export function Header() {
+export function Header({ user: initialUser }: { user: HeaderUser | null }) {
   const [open, setOpen] = useState(false);
+  const [user, setUser] = useState<HeaderUser | null>(initialUser);
   const pathname = usePathname();
+  const router = useRouter();
+
+  // Keep the header in sync with auth changes that happen client-side
+  // (sign-in, sign-out, token refresh, other tabs) without a full reload.
+  useEffect(() => {
+    const supabase = createClient();
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      const sessionUser = session?.user;
+      setUser(
+        sessionUser
+          ? {
+              email: sessionUser.email ?? '',
+              fullName: (sessionUser.user_metadata?.full_name as string | undefined) ?? null,
+            }
+          : null,
+      );
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-storm/85 backdrop-blur">
@@ -59,12 +83,16 @@ export function Header() {
             <PhoneCall className="h-4 w-4 text-emergency" aria-hidden="true" />
             (614) 401-0766
           </a>
-          <Link
-            href="/login"
-            className="hidden text-sm font-medium text-muted transition-colors hover:text-volt sm:inline"
-          >
-            Login
-          </Link>
+          {user ? (
+            <AccountMenu user={user} />
+          ) : (
+            <Link
+              href="/login"
+              className="hidden text-sm font-medium text-muted transition-colors hover:text-volt sm:inline"
+            >
+              Login
+            </Link>
+          )}
           <Link
             href="/book"
             className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-volt px-4 text-sm font-bold text-storm shadow-volt-glow transition-all hover:shadow-volt-glow-lg hover:brightness-105"
@@ -112,13 +140,44 @@ export function Header() {
                 {link.label}
               </Link>
             ))}
-            <Link
-              href="/login"
-              onClick={() => setOpen(false)}
-              className="rounded-lg px-3 py-3 text-base font-medium text-muted transition-colors hover:bg-surface hover:text-volt"
-            >
-              Login
-            </Link>
+            {user ? (
+              <>
+                <Link
+                  href="/appointments"
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg px-3 py-3 text-base font-medium text-snow transition-colors hover:bg-surface hover:text-volt"
+                >
+                  My Appointments
+                </Link>
+                <Link
+                  href="/account"
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg px-3 py-3 text-base font-medium text-snow transition-colors hover:bg-surface hover:text-volt"
+                >
+                  Account settings
+                </Link>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setOpen(false);
+                    await createClient().auth.signOut().catch(() => {});
+                    router.push('/');
+                    router.refresh();
+                  }}
+                  className="rounded-lg px-3 py-3 text-left text-base font-medium text-muted transition-colors hover:bg-surface hover:text-emergency"
+                >
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setOpen(false)}
+                className="rounded-lg px-3 py-3 text-base font-medium text-muted transition-colors hover:bg-surface hover:text-volt"
+              >
+                Login
+              </Link>
+            )}
             <a
               href="tel:+16144010766"
               className="mt-1 flex items-center gap-2 rounded-lg border border-emergency/50 bg-emergency/10 px-3 py-3 text-base font-semibold text-snow"

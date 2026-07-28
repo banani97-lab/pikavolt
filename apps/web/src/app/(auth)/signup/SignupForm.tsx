@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
 
 function safeRedirect(value: string | null): string {
-  return value && value.startsWith('/') && !value.startsWith('//') ? value : '/account';
+  return value && value.startsWith('/') && !value.startsWith('//') ? value : '/appointments';
 }
 
 export function SignupForm() {

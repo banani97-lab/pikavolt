@@ -58,20 +58,29 @@ class DepositResponse {
     required this.paymentIntentClientSecret,
     required this.depositCents,
     required this.discountCents,
+    this.depositWaived = false,
   });
 
   final String appointmentId;
-  final String paymentIntentClientSecret;
+
+  /// Null when the deposit is fully waived (a 100%-off promo, or any promo that
+  /// drops the deposit below Stripe's $0.50 minimum) — there is no
+  /// PaymentIntent to present in that case.
+  final String? paymentIntentClientSecret;
   final int depositCents;
   final int discountCents;
+
+  /// True when no payment is due — the booking is confirmed without Stripe.
+  final bool depositWaived;
 
   factory DepositResponse.fromJson(Map<String, dynamic> json) =>
       DepositResponse(
         appointmentId: json['appointmentId'] as String,
         paymentIntentClientSecret:
-            json['paymentIntentClientSecret'] as String,
+            json['paymentIntentClientSecret'] as String?,
         depositCents: (json['depositCents'] as num).toInt(),
         discountCents: (json['discountCents'] as num).toInt(),
+        depositWaived: json['depositWaived'] as bool? ?? false,
       );
 }
 

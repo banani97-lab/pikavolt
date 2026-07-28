@@ -9,7 +9,13 @@ import {
   PAYMENTS_NOT_CONFIGURED,
   validatePromoCode,
 } from '@/lib/stripe';
-import { BUSINESS_TIMEZONE, computeSlotsForDate, getBookingSettings } from '@/lib/appointments';
+import {
+  BUSINESS_TIMEZONE,
+  computeSlotsForDate,
+  getBookingSettings,
+  notifyBookingReceived,
+  notifyOwnerNewBooking,
+} from '@/lib/appointments';
 
 export const dynamic = 'force-dynamic';
 
@@ -117,11 +123,17 @@ export async function POST(request: Request) {
     if (!promo.valid) {
       return NextResponse.json({ error: 'Invalid promo code' }, { status: 400 });
     }
-    // Keep the deposit chargeable (Stripe minimum is $0.50).
-    discountCents = Math.min(promo.discountCents, Math.max(feeCents - 100, 0));
+    // A promo may cover the whole fee (e.g. a 100%-off reviewer/comp code).
+    discountCents = Math.min(promo.discountCents, feeCents);
     promoCode = promo.code;
   }
-  const depositCents = computeDeposit(feeCents, discountCents);
+  // Stripe can't process a PaymentIntent below $0.50, so any deposit that lands
+  // under the minimum (including $0 from a 100%-off code) is waived entirely —
+  // the booking is confirmed without a charge.
+  const STRIPE_MIN_CENTS = 50;
+  const rawDepositCents = computeDeposit(feeCents, discountCents);
+  const depositWaived = rawDepositCents < STRIPE_MIN_CENTS;
+  const depositCents = depositWaived ? 0 : rawDepositCents;
 
   // -- Hold the slot: insert the appointment ------------------------------------
   const { data: appointment, error: insertError } = await admin
@@ -166,6 +178,33 @@ export async function POST(request: Request) {
       })),
     );
     if (svcError) throw new Error(`appointment_services insert: ${svcError.message}`);
+
+    // -- Waived deposit: no charge, confirm the booking directly ---------------
+    // Mirrors the payment_intent.succeeded side effects the webhook would run.
+    if (depositWaived) {
+      const { error: payError } = await admin.from('payments').insert({
+        appointment_id: appointment.id,
+        kind: 'deposit',
+        amount_cents: 0,
+        status: 'succeeded',
+        stripe_payment_intent_id: null,
+        paid_at: new Date().toISOString(),
+        promo_code: promoCode,
+        discount_cents: discountCents,
+      });
+      if (payError) throw new Error(`payments insert (waived): ${payError.message}`);
+
+      await notifyBookingReceived(appointment.id).catch(() => {});
+      await notifyOwnerNewBooking(appointment.id).catch(() => {});
+
+      const body: DepositResponse = {
+        appointmentId: appointment.id,
+        depositCents: 0,
+        discountCents,
+        depositWaived: true,
+      };
+      return NextResponse.json(body);
+    }
 
     // -- Stripe customer -------------------------------------------------------
     const { data: profile } = await admin

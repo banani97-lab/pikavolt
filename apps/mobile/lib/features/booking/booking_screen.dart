@@ -889,9 +889,18 @@ class _PayButton extends ConsumerWidget {
           ref.read(bookingControllerProvider).buildDepositRequest();
       final response =
           await ref.read(apiClientProvider).createDeposit(request);
+
+      // A fully-waived deposit (100%-off promo) has no PaymentIntent — the
+      // booking is already confirmed server-side, so skip the PaymentSheet.
+      final clientSecret = response.paymentIntentClientSecret;
+      if (response.depositWaived || clientSecret == null) {
+        controller.markCompleted(response);
+        return;
+      }
+
       final result =
           await ref.read(paymentsServiceProvider).presentPaymentSheet(
-                clientSecret: response.paymentIntentClientSecret,
+                clientSecret: clientSecret,
               );
       switch (result) {
         case PaymentSheetResult.success:
@@ -1023,9 +1032,13 @@ class _SuccessView extends ConsumerWidget {
               Text('YOU\'RE BOOKED!', style: textTheme.displaySmall),
               const SizedBox(height: 12),
               Text(
-                'Deposit of ${formatCents(response.depositCents)} received. '
-                'We\'ll confirm your appointment shortly — watch for a '
-                'notification.',
+                response.depositWaived
+                    ? 'Your promo covered the deposit in full — no payment '
+                        'due. We\'ll confirm your appointment shortly — watch '
+                        'for a notification.'
+                    : 'Deposit of ${formatCents(response.depositCents)} '
+                        'received. We\'ll confirm your appointment shortly — '
+                        'watch for a notification.',
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: AppColors.mutedText),
               ),

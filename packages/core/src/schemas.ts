@@ -29,9 +29,16 @@ export type DepositRequest = z.infer<typeof DepositRequestSchema>;
 
 export const DepositResponseSchema = z.object({
   appointmentId: z.string(),
-  paymentIntentClientSecret: z.string(),
+  /**
+   * Omitted when the deposit is fully waived (a 100%-off promo, or any promo
+   * that drops the deposit below Stripe's $0.50 minimum) — there is no
+   * PaymentIntent to confirm in that case.
+   */
+  paymentIntentClientSecret: z.string().optional(),
   depositCents: z.number().int().nonnegative(),
   discountCents: z.number().int().nonnegative(),
+  /** True when no payment is due — the booking is confirmed without Stripe. */
+  depositWaived: z.boolean().optional(),
 });
 export type DepositResponse = z.infer<typeof DepositResponseSchema>;
 
