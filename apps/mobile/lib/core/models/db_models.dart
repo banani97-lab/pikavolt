@@ -126,7 +126,7 @@ class Appointment {
   const Appointment({
     required this.id,
     required this.customerId,
-    required this.addressId,
+    this.addressId,
     required this.status,
     this.isEmergency = false,
     required this.scheduledStart,
@@ -143,7 +143,9 @@ class Appointment {
 
   final String id;
   final String customerId;
-  final String addressId;
+
+  /// Null for ad-hoc invoices, which have no service address.
+  final String? addressId;
   final AppointmentStatus status;
   final bool isEmergency;
   final DateTime scheduledStart;
@@ -175,7 +177,7 @@ class Appointment {
   factory Appointment.fromJson(Map<String, dynamic> json) => Appointment(
         id: json['id'] as String,
         customerId: json['customer_id'] as String,
-        addressId: json['address_id'] as String,
+        addressId: json['address_id'] as String?,
         status: AppointmentStatus.fromWire(json['status'] as String),
         isEmergency: json['is_emergency'] as bool? ?? false,
         // Appointment times are business (Ohio) wall-clock — see core/time.dart.

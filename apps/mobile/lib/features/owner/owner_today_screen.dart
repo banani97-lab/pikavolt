@@ -42,6 +42,11 @@ class OwnerTodayScreen extends ConsumerWidget {
         title: const Text('TODAY'),
         actions: [
           IconButton(
+            tooltip: 'Calendar',
+            onPressed: () => context.push('/owner/calendar'),
+            icon: const Icon(Icons.calendar_month_outlined),
+          ),
+          IconButton(
             tooltip: 'Messages',
             onPressed: () => context.go('/owner/chat'),
             icon: Badge(

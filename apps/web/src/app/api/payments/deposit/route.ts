@@ -4,6 +4,7 @@ import { computeDeposit, DepositRequestSchema, type DepositResponse } from '@pik
 import { createApiClient } from '@/lib/supabase/api';
 import { createAdminClient } from '@/lib/supabase/admin';
 import {
+  ensureStripeCustomer,
   getStripe,
   isStripeConfigured,
   PAYMENTS_NOT_CONFIGURED,
@@ -206,26 +207,11 @@ export async function POST(request: Request) {
       return NextResponse.json(body);
     }
 
-    // -- Stripe customer -------------------------------------------------------
-    const { data: profile } = await admin
-      .from('profiles')
-      .select('stripe_customer_id, email, full_name')
-      .eq('id', user.id)
-      .single();
-
-    let customerId = profile?.stripe_customer_id as string | null;
-    if (!customerId) {
-      const customer = await stripe.customers.create({
-        email: profile?.email ?? user.email ?? undefined,
-        name: profile?.full_name ?? undefined,
-        metadata: { supabase_user_id: user.id },
-      });
-      customerId = customer.id;
-      await admin
-        .from('profiles')
-        .update({ stripe_customer_id: customerId })
-        .eq('id', user.id);
-    }
+    // -- Stripe customer (self-heals a stale test-mode/deleted id) -------------
+    const customerId = await ensureStripeCustomer(admin, {
+      userId: user.id,
+      email: user.email,
+    });
 
     // -- Deposit PaymentIntent --------------------------------------------------
     const intent = await stripe.paymentIntents.create({

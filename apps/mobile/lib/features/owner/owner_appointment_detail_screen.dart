@@ -579,14 +579,17 @@ class _CustomerCard extends ConsumerWidget {
 class _LocationCard extends ConsumerWidget {
   const _LocationCard({required this.addressId});
 
-  final String addressId;
+  final String? addressId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final address = ref.watch(addressByIdProvider(addressId)).value;
     return _SectionCard(
       title: 'LOCATION',
-      child: address == null
+      child: addressId == null
+          ? const Text('No service address (invoice).',
+              style: TextStyle(color: AppColors.mutedText))
+          : address == null
           ? const Text('Loading…',
               style: TextStyle(color: AppColors.mutedText))
           : Row(

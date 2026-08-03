@@ -43,3 +43,4 @@ apps/mobile/build/
 .idea/
 .vscode/*
 !.vscode/extensions.json
+apps/mobile/dart_defines/

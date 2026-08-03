@@ -5,6 +5,7 @@ import { computeFinal, SERVICE_CALL_FEE_CENTS, type FinalPaymentResponse } from 
 import { createApiClient } from '@/lib/supabase/api';
 import { createAdminClient } from '@/lib/supabase/admin';
 import {
+  ensureStripeCustomer,
   getSavedPaymentMethodId,
   getStripe,
   isStripeConfigured,
@@ -147,18 +148,8 @@ export async function POST(request: Request) {
     return NextResponse.json(body);
   }
 
-  const { data: profile } = await admin
-    .from('profiles')
-    .select('stripe_customer_id')
-    .eq('id', appt.customer_id)
-    .single();
-  const customerId = profile?.stripe_customer_id as string | null;
-  if (!customerId) {
-    return NextResponse.json(
-      { error: 'Customer has no Stripe customer record' },
-      { status: 500 },
-    );
-  }
+  // Self-heals a stale test-mode/deleted id, and creates one if somehow absent.
+  const customerId = await ensureStripeCustomer(admin, { userId: appt.customer_id });
 
   const insertPaymentRow = async (pi: Stripe.PaymentIntent) => {
     const { error } = await admin.from('payments').insert({

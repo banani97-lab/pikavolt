@@ -189,7 +189,7 @@ class _ServicesCard extends ConsumerWidget {
 class _AddressCard extends ConsumerWidget {
   const _AddressCard({required this.addressId});
 
-  final String addressId;
+  final String? addressId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

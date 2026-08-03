@@ -93,9 +93,11 @@ final appointmentPaymentsProvider =
       .toList();
 });
 
-/// A single address row (used by the appointment detail screen).
+/// A single address row (used by the appointment detail screen). Accepts a
+/// null id — invoices have no service address — and resolves to null.
 final addressByIdProvider =
-    FutureProvider.family<Address?, String>((ref, id) async {
+    FutureProvider.family<Address?, String?>((ref, id) async {
+  if (id == null) return null;
   final client = ref.watch(supabaseClientProvider);
   final row =
       await client.from('addresses').select().eq('id', id).maybeSingle();

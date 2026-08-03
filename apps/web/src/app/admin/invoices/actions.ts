@@ -1,11 +1,12 @@
 'use server';
 
 import { randomBytes } from 'crypto';
+import type Stripe from 'stripe';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { getStripe, isStripeConfigured } from '@/lib/stripe';
+import { ensureStripeCustomer, getStripe, isStripeConfigured } from '@/lib/stripe';
 import { sendInvoiceRequest } from '@/lib/invoices';
 
 export interface CreateInvoiceResult {
@@ -106,21 +107,24 @@ export async function createInvoice(input: unknown): Promise<CreateInvoiceResult
     }
   }
 
-  // 2. Ensure the Stripe customer.
-  const { data: prof } = await admin
-    .from('profiles')
-    .select('stripe_customer_id, email, full_name')
-    .eq('id', customerId)
-    .single();
-  let stripeCustomerId = (prof?.stripe_customer_id as string | null) ?? null;
-  if (!stripeCustomerId) {
-    const customer = await stripe.customers.create({
-      email: prof?.email ?? v.customerEmail ?? undefined,
-      name: prof?.full_name ?? v.customerName ?? undefined,
-      metadata: { supabase_user_id: customerId },
+  if (!customerId) {
+    return { ok: false, error: 'Could not resolve the customer.' };
+  }
+
+  // 2. Ensure a Stripe customer valid in the current mode. Self-heals a stale
+  //    test-mode or deleted id so an existing customer never 500s here.
+  let stripeCustomerId: string;
+  try {
+    stripeCustomerId = await ensureStripeCustomer(admin, {
+      userId: customerId,
+      email: v.customerEmail,
+      name: v.customerName,
     });
-    stripeCustomerId = customer.id;
-    await admin.from('profiles').update({ stripe_customer_id: customer.id }).eq('id', customerId);
+  } catch (err) {
+    return {
+      ok: false,
+      error: `Stripe customer error: ${err instanceof Error ? err.message : 'unknown error'}`,
+    };
   }
 
   // 3. Create the invoice appointment. Off the booking calendar: scheduled_start
@@ -156,14 +160,22 @@ export async function createInvoice(input: unknown): Promise<CreateInvoiceResult
   //    or ACH on the public page. When upfront is 0, nothing is billed now — the
   //    full total is collected on completion.
   if (v.upfrontCents > 0) {
-    const intent = await stripe.paymentIntents.create({
-      amount: v.upfrontCents,
-      currency: 'usd',
-      customer: stripeCustomerId,
-      automatic_payment_methods: { enabled: true },
-      ...(v.autoChargeRemainder ? { setup_future_usage: 'off_session' as const } : {}),
-      metadata: { appointment_id: appt.id, kind: 'deposit', invoice: 'true' },
-    });
+    let intent: Stripe.PaymentIntent;
+    try {
+      intent = await stripe.paymentIntents.create({
+        amount: v.upfrontCents,
+        currency: 'usd',
+        customer: stripeCustomerId,
+        automatic_payment_methods: { enabled: true },
+        ...(v.autoChargeRemainder ? { setup_future_usage: 'off_session' as const } : {}),
+        metadata: { appointment_id: appt.id, kind: 'deposit', invoice: 'true' },
+      });
+    } catch (err) {
+      return {
+        ok: false,
+        error: `Could not create the upfront charge: ${err instanceof Error ? err.message : 'unknown error'}`,
+      };
+    }
     const { error: payErr } = await admin.from('payments').insert({
       appointment_id: appt.id,
       kind: 'deposit',

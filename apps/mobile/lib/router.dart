@@ -16,6 +16,7 @@ import 'features/chat/owner_chat_list_screen.dart';
 import 'features/chat/owner_conversation_screen.dart';
 import 'features/home/customer_home_screen.dart';
 import 'features/owner/owner_appointment_detail_screen.dart';
+import 'features/owner/owner_calendar_screen.dart';
 import 'features/owner/owner_today_screen.dart';
 import 'features/tracking/customer_map_screen.dart';
 
@@ -119,6 +120,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/owner/today',
         builder: (context, state) => const OwnerTodayScreen(),
+      ),
+      GoRoute(
+        path: '/owner/calendar',
+        builder: (context, state) => const OwnerCalendarScreen(),
       ),
       GoRoute(
         path: '/owner/appointments/:id',

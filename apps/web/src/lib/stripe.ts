@@ -1,6 +1,7 @@
 import 'server-only';
 
 import Stripe from 'stripe';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { SERVICE_CALL_FEE_CENTS } from '@pikavolt/core';
 
 let stripeSingleton: Stripe | null = null;
@@ -35,6 +36,52 @@ export function getStripe(): Stripe {
     stripeSingleton = new Stripe(key);
   }
   return stripeSingleton;
+}
+
+/**
+ * Return a Stripe customer id guaranteed to exist in the CURRENT Stripe mode,
+ * persisting it on the profile.
+ *
+ * A stored `profiles.stripe_customer_id` may reference a customer from a
+ * different mode (a test-mode `cus_…` left over after flipping to live keys) or
+ * one deleted in the dashboard. Charging such a customer throws
+ * "No such customer" (`resource_missing`), which otherwise surfaces as an opaque
+ * 500. This verifies the stored id and transparently re-creates + re-persists it
+ * when it is missing or invalid, so callers never fail on a stale customer.
+ */
+export async function ensureStripeCustomer(
+  admin: SupabaseClient,
+  opts: { userId: string; email?: string | null; name?: string | null },
+): Promise<string> {
+  const stripe = getStripe();
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('stripe_customer_id, email, full_name')
+    .eq('id', opts.userId)
+    .single();
+
+  const existing = (profile?.stripe_customer_id as string | null) ?? null;
+  if (existing) {
+    try {
+      const customer = await stripe.customers.retrieve(existing);
+      if (!(customer as Stripe.DeletedCustomer).deleted) return existing;
+      // deleted in the dashboard → fall through and re-create
+    } catch (err) {
+      // Only a genuinely-missing customer is recoverable; re-throw anything else
+      // (network, auth) so the caller reports it rather than masking it.
+      if (!(err instanceof Stripe.errors.StripeError) || err.code !== 'resource_missing') {
+        throw err;
+      }
+    }
+  }
+
+  const created = await stripe.customers.create({
+    email: opts.email ?? (profile?.email as string | null) ?? undefined,
+    name: opts.name ?? (profile?.full_name as string | null) ?? undefined,
+    metadata: { supabase_user_id: opts.userId },
+  });
+  await admin.from('profiles').update({ stripe_customer_id: created.id }).eq('id', opts.userId);
+  return created.id;
 }
 
 export interface PromoValidation {
